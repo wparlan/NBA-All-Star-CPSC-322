@@ -337,7 +337,6 @@ def Nmaxelements(list1, N):
         final_list.append(max_index)          
     return final_list
 
-<<<<<<< HEAD
     return values, counts
 
 def compute_equal_width_cutoffs(values, num_bins):
@@ -364,7 +363,6 @@ def create_output_for_discrete(X_train, bins=10):
         train_output.append(f'{cut}<=X<{train_cutoffs[i+1]}')
     train_output.append(f'X>{train_cutoffs[-1]}')
     return train_output
-=======
 def find_tree_max(tree, max_count, max_value):
     for i in range(len(tree)):
         value = tree[i]
@@ -378,4 +376,3 @@ def find_tree_max(tree, max_count, max_value):
                 max_value = tree[i+1]
                 max_count = tree[i+2]
             return max_value
->>>>>>> d31637340e1af23cb9f31b0f5bab8b9f666ec3c6
