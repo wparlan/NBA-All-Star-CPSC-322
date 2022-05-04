@@ -535,9 +535,11 @@ class MyDecisionTreeClassifier:
                 return tree
             else: # none of the previous conditions were true... recurse!
                 subtree = self.tdidt(header, attribute_domains, att_partition, available_attributes.copy())
+                if subtree is None or len(subtree) == 0:
+                    print(subtree)
+                    print(tree)
                 if subtree[0] == 'Leaf':
                     # check to make sure there are no other leafs with same value
-                    # subtree[0] = 'LEAF CASE 3'
                     subtree[-1] = len(current_instances)
                 # note the copy
                 value_subtree.append(subtree)
@@ -597,6 +599,8 @@ class MyDecisionTreeClassifier:
         # identify which attribute to split on ('attr#')
         # call again until we reach a root
         # return the prediction from the root
+        if len(tree) == 0:
+            return
         if tree[0] == 'Leaf':
             return tree[1]
         split_attribute_index = int(tree[1][-1]) # last char from attr# string

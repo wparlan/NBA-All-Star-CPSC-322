@@ -156,6 +156,25 @@ def discretize_ratings(val):
                 break
     return rating
 
+def discretize_ratings_custom(val, cutoffs, output):
+    """Takes an mpg value and converts it to a classification
+    Args:
+        val (float): value to be evaluated
+        cutoffs (list of int): cutoffs for the val
+        output (list of str): parallel+2 to cutoffs, names for each cutoff
+    Returns:
+        output (str): string from output
+    """
+    length = len(cutoffs)
+    if val <= cutoffs[0]:
+        return output[0]
+    elif val >= cutoffs[-1]:
+        return output[-1]
+    else:
+        for i in range(1, length):
+            if val <= cutoffs[i]:
+                return output[(i + 1)]
+
 def discretize_ratings_normal(val):
     """Takes a normalized mpg value and converts it to a classification
     Args:

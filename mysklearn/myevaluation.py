@@ -251,6 +251,8 @@ def confusion_matrix(y_true, y_pred, labels):
         new_row = [0] * len(labels)
         for true, pred in zip(y_true, y_pred):
             if true == label:
+                if pred is None:
+                    continue
                 new_row[labels.index(pred)] += 1
         matrix.append(new_row)
     return matrix
