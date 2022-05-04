@@ -48,6 +48,7 @@ def train_test_split(X, y, test_size=0.33, random_state=None, shuffle=True):
 
 def kfold_cross_validation(X, n_splits=5, random_state=None, shuffle=False):
     """Split dataset into cross validation folds.
+
     Args:
         X(list of list of obj): The list of samples
             The shape of X is (n_samples, n_features)
@@ -57,6 +58,7 @@ def kfold_cross_validation(X, n_splits=5, random_state=None, shuffle=False):
     Returns:
         X_train_folds(list of list of int): The list of training set indices for each fold
         X_test_folds(list of list of int): The list of testing set indices for each fold
+
     Notes:
         The first n_samples % n_splits folds have size n_samples // n_splits + 1,
             other folds have size n_samples // n_splits, where n_samples is the number of samples
@@ -64,52 +66,52 @@ def kfold_cross_validation(X, n_splits=5, random_state=None, shuffle=False):
         Loosely based on sklearn's KFold split():
             https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.KFold.html
     """
-
-    n_samples = len(X)
-    X_copy = list(X)
-    switch_form = n_samples % n_splits
-    print(n_samples, n_splits, switch_form)
-    start_index = 0
-    end_index = 0    
     X_train_folds = []
     X_test_folds = []
+    split_indices = []
+    # create a list of split indices
+    n_samples = len(X)
+    first_indices = n_samples % n_splits
+    current_index = 0
+    # from the notes: The first n_samples % n_splits folds have size n_samples // n_splits + 1
+    for num in range(first_indices):
+        index_pair = [current_index]
+        current_index += n_samples // n_splits + 1
+        index_pair.append(current_index)
+        split_indices.append(index_pair)
+    # from the notes: other folds have size n_samples // n_splits, where n_samples is the number of samples
+    while len(split_indices) < n_splits:
+        index_pair = [current_index]
+        current_index += n_samples // n_splits
+        index_pair.append(current_index)
+        split_indices.append(index_pair)
+    # create lists based off splits
+    for split in split_indices:
+        new_test = list(range(split[0], split[1]))
+        new_train = []
+        for num in range(len(X)):
+            if num not in new_test:
+                new_train.append(num)
+        # add our 1d arrays to our 2d list
+        X_test_folds.append(new_test)
+        X_train_folds.append(new_train)
+    # shuffle the array and reassign the indices based on their new locations
     if shuffle:
-        if random_state is not None:
-            np.random.seed(random_state)
-        myutils.randomize_in_place(X_copy)   
-    for i in range(n_splits):
-        test_list = []
-        train_list = []
-        if i < switch_form:
-            end_index = n_samples // n_splits + 1 + start_index
-        else:
-            end_index = n_samples // n_splits + start_index
-            
-        if end_index == n_samples - 1 and i == n_splits - 1:
-            test_list = [x for x in range(start_index, n_samples)]
-        else:
-            test_list = [x for x in range(start_index, end_index)]   
-        start_index = end_index
-        for j in range(len(X_copy)):
-            if j not in test_list:
-                train_list.append(j)
-        if shuffle:
-            for j in range(len(train_list)):
-                train_list[j] = X_copy.index(X[train_list[j]])
-            for j in range(len(test_list)):
-                test_list[j] = X_copy.index(X[test_list[j]])              
-        X_train_folds.append(train_list)
-        print(i, "| Train Fold:", train_list)
-        X_test_folds.append(test_list)
-        print(i, "| Test Fold:", test_list)
-        
-    print( "Train Folds:", X_train_folds)
-    print( "Test Folds:", X_test_folds)
+        old_x = list(X)
+        myutils.randomize_in_place(X, random_state=random_state)
+        # for each index in non-shuffled X, find the equivalent index in the shuffled X
+        for i, test in enumerate(X_test_folds):
+            for j, index in enumerate(test):
+                X_test_folds[i][j] = X.index(old_x[index])
+        # again but for train
+        for i, train in enumerate(X_train_folds):
+            for j, index in enumerate(train):
+                X_train_folds[i][j] = X.index(old_x[index])
     return X_train_folds, X_test_folds
-                
 
 def stratified_kfold_cross_validation(X, y, n_splits=5, random_state=None, shuffle=False):
     """Split dataset into stratified cross validation folds.
+
     Args:
         X(list of list of obj): The list of instances (samples).
             The shape of X is (n_samples, n_features)
@@ -121,63 +123,57 @@ def stratified_kfold_cross_validation(X, y, n_splits=5, random_state=None, shuff
     Returns:
         X_train_folds(list of list of int): The list of training set indices for each fold.
         X_test_folds(list of list of int): The list of testing set indices for each fold.
+
     Notes:
         Loosely based on sklearn's StratifiedKFold split():
             https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.StratifiedKFold.html#sklearn.model_selection.StratifiedKFold
     """
-    n_samples = len(X)
-    X_copy = list(X)
-    y_copy = list(y)
-    print(n_samples, n_splits)
-    print(X, " | ", y_copy)
-    start_index = 0
-    end_index = 0    
-    X_train_folds = []
-    X_test_folds = []
+    # built an array of indices
+    X_indices = [[i] for i in range(len(X))]
+    # set up randomize and shuffle
+    if random_state is not None:
+        np.random.seed(random_state)
     if shuffle:
-        if random_state is not None:
-            np.random.seed(random_state)
-        myutils.randomize_in_place(X_copy, y_copy)   
-    group_names, group_subtables = myutils.group_by(X_copy, y_copy)
-    print("Group names:", group_names, " |  Group subtables:", group_subtables)
-    curr_classifier_indexes = [0 for x in group_names]
-    curr_classfier = 0
+        for i, _ in enumerate(X):
+            rand_index = np.random.randint(0, len(X))
+            X_indices[i], X_indices[rand_index] = X_indices[rand_index], X_indices[i]
+    # group by y values
+    _, group_subtables = myutils.group_by(X_indices, y)
+    # prepare train and test
+    X_train_folds, X_test_folds = [], [[] for _ in range(n_splits)]
+    split_sizes = []
+    first_n_samples = len(X) % n_splits # used for determining test sample size
+    # build the sizes of each test set
     for i in range(n_splits):
-        if i < n_samples % n_splits:
-            size = n_samples // n_splits + 1
+        if i < first_n_samples:
+            split_sizes.append(len(X) // n_splits + 1)
         else:
-            size = n_samples // n_splits
-        
-        train_list = []
-        test_list = []
-        for j in range(size):
-            if curr_classifier_indexes[curr_classfier] < len(group_subtables[curr_classfier]):
-                test_list.append(X_copy.index(group_subtables[curr_classfier][curr_classifier_indexes[curr_classfier]]))
-                curr_classifier_indexes[curr_classfier] += 1
-            else:
-                size += 1
-                
-            curr_classfier += 1
-            if curr_classfier == len(group_names):
-                curr_classfier = 0
-                
-        train_list = []
-        for j in range(len(X_copy)):
-            if j not in test_list:
-                train_list.append(j)
-        
-        if shuffle:
-            for j in range(len(train_list)):
-                train_list[j] = X_copy.index(X[train_list[j]])
-            for j in range(len(test_list)):
-                test_list[j] = X_copy.index(X[test_list[j]])
-        
-        print(i, "| Train Fold:", train_list)       
-        X_train_folds.append(train_list)
-        X_test_folds.append(test_list)
-        print(i, "| Test Fold:", test_list)
-    print( "Train Folds:", X_train_folds)
-    print( "Test Folds:", X_test_folds)
+            split_sizes.append(len(X) // n_splits)
+    # create counters to keep track of which index and table
+    subtable_id, subtable_index = 0, 0
+    # create splits
+    for split in range(n_splits):
+        # while split is less than the size keep adding on
+        while len(X_test_folds[split]) < split_sizes[split]:
+            table = group_subtables[subtable_id]
+            # catch index out of bounds if one of the subtables is too small
+            try:
+                X_test_folds[split] += table[subtable_index]
+            except IndexError:
+                pass
+            # cycle through the subtables
+            subtable_id = (subtable_id + 1) % len(group_subtables)
+            # if you have cycled back to the first table, increment the index
+            if subtable_id == 0:
+                subtable_index += 1
+    # build training sets based on the test sets
+    for test_set in X_test_folds:
+        new_row = []
+        for index in range(len(X)):
+            if index not in test_set:
+                new_row.append(index)
+        X_train_folds.append(new_row)
+    # return
     return X_train_folds, X_test_folds
 
 def bootstrap_sample(X, y=None, n_samples=None, random_state=None):
@@ -228,31 +224,32 @@ def bootstrap_sample(X, y=None, n_samples=None, random_state=None):
 
 def confusion_matrix(y_true, y_pred, labels):
     """Compute confusion matrix to evaluate the accuracy of a classification.
+
     Args:
         y_true(list of obj): The ground_truth target y values
             The shape of y is n_samples
         y_pred(list of obj): The predicted target y values (parallel to y_true)
             The shape of y is n_samples
         labels(list of str): The list of all possible target y labels used to index the matrix
+
     Returns:
         matrix(list of list of int): Confusion matrix whose i-th row and j-th column entry
             indicates the number of samples with true label being i-th class
             and predicted label being j-th class
+
     Notes:
         Loosely based on sklearn's confusion_matrix():
             https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html
     """
-    print(y_true)
-    print(y_pred)
-    print(labels)
     matrix = []
-    for i in range(len(labels)):
-        row = [0 for x in labels]
-        for j in range(len(y_true)):
-            if(y_true[j] == labels[i]):
-                row[labels.index(y_pred[j])] += 1
-        matrix.append(row)
-        print(i, " |", row)      
+    for label in labels:
+        new_row = [0] * len(labels)
+        for true, pred in zip(y_true, y_pred):
+            if true == label:
+                if pred is None:
+                    continue
+                new_row[labels.index(pred)] += 1
+        matrix.append(new_row)
     return matrix
 
 def accuracy_score(y_true, y_pred, normalize=True):
