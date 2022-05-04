@@ -17,7 +17,7 @@ def get_frequencies(table, col_name):
         table.convert_to_numeric()
         col.sort() # inplace
     except TypeError as e:
-        print(e)     
+        print(e)
         table.convert_to_string()
         col = table.get_column(col_name)
         col.sort()
@@ -58,7 +58,7 @@ def compute_bin_frequencies(values, cutoffs):
 
     Returns:
         list(int) of frequency of values in each bin
-    """ 
+    """
     freqs = [0 for _ in range(len(cutoffs) - 1)] # because N + 1 cutoffs
     for value in values:
         if value == max(values):
