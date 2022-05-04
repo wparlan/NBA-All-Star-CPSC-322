@@ -81,7 +81,7 @@ def compute_equal_width_cutoffs(values, num_bins):
     # if your application allows, we should convert to int
     # or optionally round them
     cutoffs = [round(cutoff, 2) for cutoff in cutoffs]
-    return cutoffs 
+    return cutoffs
     
 def get_percentage(table, columns):
     table.convert_to_numeric()

@@ -258,3 +258,28 @@ def get_frequencies_2D(input_data, col_index):
             counts.append(1)
 
     return values, counts
+
+def compute_equal_width_cutoffs(values, num_bins):
+    """create bins of equal width"""
+    values_range = max(values) - min(values)
+    bin_width = values_range / num_bins # float
+    # since bin_width is a float, we shouldn't use range() to generate a list
+    # of cutoffs, use np.arange()
+    cutoffs = list(np.arange(min(values), max(values), bin_width))
+    cutoffs.append(max(values)) # exactly the max(values)
+    # to handle round off error... 
+    # if your application allows, we should convert to int
+    # or optionally round them
+    cutoffs = [round(cutoff, 2) for cutoff in cutoffs]
+    return cutoffs
+
+def create_output_for_discrete(X_train, bins=10):
+    """create output for the function discretize_ratings_custom"""
+    train_cutoffs = compute_equal_width_cutoffs(X_train, bins)
+    train_output = [f'X<{train_cutoffs[0]}']
+    for i, cut in enumerate(train_cutoffs):
+        if i == len(train_cutoffs)-1:
+            break
+        train_output.append(f'{cut}<=X<{train_cutoffs[i+1]}')
+    train_output.append(f'X>{train_cutoffs[-1]}')
+    return train_output
