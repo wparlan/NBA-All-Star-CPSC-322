@@ -1,0 +1,32 @@
+import numpy as np
+from sklearn.tree import DecisionTreeClassifier
+from mysklearn.myclassifiers import MyRandomForestClassifier
+from mysklearn import myutils
+from mysklearn.myclassifiers import MyDecisionTreeClassifier
+
+X_train = [
+        ["Senior", "Java", "no", "no"],
+        ["Senior", "Java", "no", "yes"],
+        ["Mid", "Python", "no", "no"],
+        ["Junior", "Python", "no", "no"],
+        ["Junior", "R", "yes", "no"],
+        ["Junior", "R", "yes", "yes"],
+        ["Mid", "R", "yes", "yes"],
+        ["Senior", "Python", "no", "no"],
+        ["Senior", "R", "yes", "no"],
+        ["Junior", "Python", "yes", "no"],
+        ["Senior", "Python", "yes", "yes"],
+        ["Mid", "Python", "no", "yes"],
+        ["Mid", "Java", "yes", "no"],
+        ["Junior", "Python", "no", "yes"]
+    ]
+y_train = ["False", "False", "True", "True", "True", "False", "True", "False", "True", "True", "True", "True", "True", "False"]
+
+def test_random_forest_classifier_fit():
+    my_classfier = MyRandomForestClassifier()
+    my_classfier.fit(X_train, y_train, 10, 2, 6)
+    assert True == False
+    
+
+def test_random_forest_classifier_predict():
+    assert False == True
