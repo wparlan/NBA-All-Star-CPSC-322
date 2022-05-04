@@ -283,3 +283,17 @@ def create_output_for_discrete(X_train, bins=10):
         train_output.append(f'{cut}<=X<{train_cutoffs[i+1]}')
     train_output.append(f'X>{train_cutoffs[-1]}')
     return train_output
+
+def find_tree_max(tree, max_count, max_value):
+    for i in range(len(tree)):
+        value = tree[i]
+        if value == "Attribute":
+            for j in range(2, len(tree)):
+                find_tree_max(tree[j], max_count, max_value)
+        elif value == "Value":
+            find_tree_max(tree[i+2], max_count, max_value)
+        elif value == "Leaf":
+            if tree[i+2] > max_count:
+                max_value = tree[i+1]
+                max_count = tree[i+2]
+            return max_value
