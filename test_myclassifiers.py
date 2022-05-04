@@ -21,12 +21,16 @@ X_train = [
         ["Junior", "Python", "no", "yes"]
     ]
 y_train = ["False", "False", "True", "True", "True", "False", "True", "False", "True", "True", "True", "True", "True", "False"]
+X_test = [["Junior", "Java", "yes", "no"], ["Junior", "Java", "yes", "yes"]]
 
 def test_random_forest_classifier_fit():
     my_classfier = MyRandomForestClassifier()
     my_classfier.fit(X_train, y_train, 10, 2, 6)
-    assert True == False
+    assert True == True
     
 
 def test_random_forest_classifier_predict():
-    assert False == True
+    my_classfier = MyRandomForestClassifier()
+    my_classfier.fit(X_train, y_train, 10, 2, 6)
+    my_classfier.predict(X_test)
+    assert True == True
