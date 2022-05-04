@@ -1,10 +1,6 @@
-import operator
-from bitarray import test
 import math
+from mysklearn import myutils, myevaluation
 
-import py
-from mysklearn import myutils
-from mysklearn import myevaluation
 class MyDecisionTreeClassifier:
     """Represents a decision tree classifier.
     Attributes:
@@ -41,14 +37,15 @@ class MyDecisionTreeClassifier:
             Store the tree in the tree attribute.
             Use attribute indexes to construct default attribute names (e.g. "att0", "att1", ...).
         """
+        self.X_train = X_train
+        self.y_train = y_train
         attributes = []
         for i in range(len(X_train[0])):
             attribute = "att" + str(i)
-            attributes.append(attribute) 
+            attributes.append(attribute)
         train = [X_train[i] + [y_train[i]] for i in range(len(X_train))]
         available_attributes = attributes.copy()
         self.tree = myutils.tdidt(train, train, available_attributes, len(train), F)
-        
 
     def predict(self, X_test):
         """Makes predictions for test instances in X_test.
@@ -64,15 +61,15 @@ class MyDecisionTreeClassifier:
         at_leaf = ""
         traverse_tree = self.tree.copy()
         while at_leaf != "Leaf":
-                for i in range(2, len(traverse_tree)):
-                    if traverse_tree[0] == "Leaf":
-                        at_leaf = "Leaf"
-                        if traverse_tree[2] > maj_value:
-                            maj_value = traverse_tree[2]
-                            majority = traverse_tree[1]
-                        break
-                    else:
-                        traverse_tree = traverse_tree[2][2]
+            for i in range(2, len(traverse_tree)):
+                if traverse_tree[0] == "Leaf":
+                    at_leaf = "Leaf"
+                    if traverse_tree[2] > maj_value:
+                        maj_value = traverse_tree[2]
+                        majority = traverse_tree[1]
+                    break
+                else:
+                    traverse_tree = traverse_tree[2][2]
         for instance in X_test:
             at_leaf = ""
             head_attribute = self.tree[1]
@@ -161,7 +158,6 @@ class MyRandomForestClassifier:
         self.N = N
         self.M = M
         self.F = F
-        
         train_folds, test_folds = myevaluation.stratified_kfold_cross_validation(self.X_train, self.y_train, 3, None, True)
         train_fold = train_folds[0]
         test_fold = test_folds[0]

@@ -1,8 +1,9 @@
 import numpy as np
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
-from mysklearn.myclassifiers import MyRandomForestClassifier
-from mysklearn import myutils
+import mysklearn.myutils as myutils
 from mysklearn.myclassifiers import MyDecisionTreeClassifier
+from mysklearn.random_forest import MyRandomForestClassifier
 
 X_train = [
         ["Senior", "Java", "no", "no"],

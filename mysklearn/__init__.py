@@ -4,4 +4,4 @@
 Note: this is the package initializer for mysklearn
 """
 
-__all__ = ["myutils", "mypytable", "myclassifiers", "myevaluation"]
+__all__ = ["myutils", "mypytable", "myclassifiers", "myevaluation", "random_forest"]
